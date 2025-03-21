@@ -1,7 +1,7 @@
 -- SQL Retail Sales Analysis - Project1
 --Create Table
 DROP TABLE IF EXISTS retail_sales;
-Create table retail_sales
+CREATE TABLE retail_sales
 			(
 			    transactions_id INT PRIMARY KEY,
 				sale_date DATE,	
@@ -25,162 +25,161 @@ SELECT COUNT(*) FROM retail_sales
 -- Data Cleaning
 
 SELECT * FROM retail_sales
-WHERE transactions_id is null
+WHERE transactions_id IS NULL
 
 SELECT * FROM retail_sales
-WHERE sale_date is null
+WHERE sale_date IS NULL
 
 SELECT * FROM retail_sales
-WHERE sale_time is null
+WHERE sale_time IS NULL
 
 SELECT * FROM retail_sales
 WHERE 
-	transactions_id is null
-	or
-	sale_date is null
-	or
-	sale_time is null
-	or
-	gender is null
-	or
-	category is null
-	or
-	quantiy is null
-	or
-	cogs is null
-	or
-	total_sale is null
+	transactions_id IS NULL
+	OR
+	sale_date IS NULL
+	OR
+	sale_time IS NULL
+	OR
+	gender IS NULL
+	OR
+	category IS NULL
+	OR
+	quantiy IS NULL
+	OR
+	cogs IS NULL
+	OR
+	total_sale IS NULL
 
-delete from retail_sales
+DELETE FROM retail_sales
 WHERE 
-	transactions_id is null
-	or
-	sale_date is null
-	or
-	sale_time is null
-	or
-	gender is null
-	or
-	category is null
-	or
-	quantiy is null
-	or
-	cogs is null
-	or
-	total_sale is null;
+	transactions_id IS NULL
+	OR
+	sale_date IS NULL
+	OR
+	sale_time IS NULL
+	OR
+	gender IS NULL
+	OR
+	category IS NULL
+	OR
+	quantiy IS NULL
+	OR
+	cogs IS NULL
+	OR
+	total_sale IS NULL;
 
 -- Data Exploration
 
 -- sales count
-select count(*) as total_sale from retail_sales
+SELECT COUNT(*) AS total_sale FROM retail_sales
 
 -- customer count
-select count(Distinct customer_id) as total_sale from retail_sales
+SELECT COUNT(DISTINCT customer_id) AS total_sale FROM retail_sales
 
 -- Distinct category 
-select Distinct category as total_sale from retail_sales
+SELECT DISTINCT category AS total_sale FROM retail_sales
 
 -- Data anlaysis and Business key problems and answers
 
 -- all columns for sales made in 2022-11-05
-select *
-from retail_sales
-where sale_date = '2022-11-05';
+SELECT *
+FROM retail_sales
+WHERE sale_date = '2022-11-05';
 
 -- all transactions where the category is Clothing and the quantity is more than 3 in the month of Nov-2022
-select *
-from retail_sales
-where category = 'Clothing'
-	and to_char(sale_date, 'YYYY-MM') = '2022-11'
-	and quantiy > 3
+SELECT *
+FROM retail_sales
+WHERE category = 'Clothing'
+	AND to_char(sale_date, 'YYYY-MM') = '2022-11'
+	AND quantiy > 3
 
 -- the total sales for each category
-select 
+SELECT 
 	category,
-	sum(total_sale) as net_sale,
-	count(*) as total_orders
-from retail_sales
-group by 1
+	SUM(total_sale) AS net_sale,
+	COUNT(*) AS total_orders
+FROM retail_sales
+GROUP BY 1
 
 -- average age of customers who purchased items from 'Beauty' category
-select 
-	round(avg(age))
-from retail_sales
-where category = 'Beauty'
+SELECT 
+	ROUND(AVG(age))
+FROM retail_sales
+WHERE category = 'Beauty'
 
 -- finding all transactions where the total_sale is greater than 1000
-select
+SELECT
 	transactions_id,
 	total_sale
-from 
+FROM 
 	retail_sales
-where
+WHERE
 	total_sale > 1000
-order by transactions_id asc
+ORDER BY transactions_id ASC
 
 -- finding the total number of transaction (transactions_id) made by each gender in each category
-select 
+SELECT 
 	category,
 	gender,
-	count(*) as total_transaction
-from 
+	COUNT(*) AS total_transaction
+FROM 
 	retail_sales
-group by
+GROUP BY
 	category,
 	gender
-order by 1
+ORDER BY 1
 
 
 -- calculating the average sale for each month and the best selling month in each year 
 
-select * from
+SELECT * FROM
 (
-	select 
-		extract(YEAR from sale_date) as year,
-		extract(MONTH from sale_date) as month,
-		round(avg(total_sale)) as avg_sale,
-		rank() over(partition by extract(YEAR from sale_date) order by round(avg(total_sale)) desc) as rank
-	from retail_sales
-	group by 1,2
-	order by 1,3 desc
-) as t1
-where rank = 1
+	SELECT 
+		EXTRACT(YEAR FROM sale_date) AS year,
+		EXTRACT(MONTH FROM sale_date) AS month,
+		round(AVG(total_sale)) AS avg_sale,
+		RANK() OVER(PARTITION BY EXTRACT(YEAR FROM sale_date) ORDER BY ROUND(AVG(total_sale)) DESC) AS rank
+	FROM retail_sales
+	GROUP BY 1,2
+	ORDER BY 1,3 DESC
+) AS t1
+WHERE rank = 1
 
 -- finding the top 5 customers based on the highest total sales
 
-select 
+SELECT 
 	customer_id,
-	sum(total_sale) as total_sales
-from retail_sales
-group by 1
-order by 2 desc
-limit 5
+	SUM(total_sale) AS total_sales
+FROM retail_sales
+GROUP BY 1
+ORDER BY 2 desc
+LIMIT 5
 
 -- number of unique customers who purchased items from each category
-
-select
+SELECT
 	category,
-	count(distinct customer_id) as unique_customers
-from
+	COUNT(DISTINCT customer_id) AS unique_customers
+FROM
 	retail_sales
-group by 1
-order by 2 asc
+GROUP BY 1
+ORDER BY 2 ASC
 
 -- creating each shift with number of orders (example Morning <12, Afternoon between 12 & 17, Evening >17)
-with hourly_sale
-as
+WITH hourly_sale
+AS
 (
-select *,
-	case
-		when extract(HOUR from sale_time) < 12 then 'Morning'
-		when extract(HOUR from sale_time) between 12 and 17 then 'Afternoon'
-		else 'Evening'
-	end as shift
-from retail_sales
+	SELECT *,
+		CASE
+			WHEN EXTRACT(HOUR FROM sale_time) < 12 THEN 'Morning'
+			WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
+			ELSE 'Evening'
+		END AS shift
+	FROM retail_sales
 )
-select 
+SELECT
 	shift,
-	count(*) as total_orders
-from hourly_sale
-group by shift
+	COUNT( *) AS total_orders
+FROM hourly_sale
+GROUP BY shift
 
